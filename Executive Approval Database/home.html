@@ -7,7 +7,7 @@
 	<link href='https://fonts.googleapis.com/css?family=Montserrat' rel='stylesheet' type='text/css'>
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.2/jquery.min.js"></script>
 	<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-    <script type="text/JavaScript" src="main-google-charts.js"></script>
+    <script type="text/JavaScript" src="home.js"></script>
 	
     <style>
         body {
@@ -101,14 +101,15 @@
 		}
     </style>
 </head>
-<body onload="autoload();">
+<body>
 	<h2 id="banner">Executive Approval Database Visualization</h2>
 	<div id="divFilter">
 		<table>
 			<tr>
 				<td>Country:</td>
 				<td>
-					<div id="country"></div>
+					<select id="country" onchange = "countryChanged();">
+					</select>
 				</td>
 				<td>
 					<input type="radio" name="calculationMethod" id="rdioMultiSource" onclick="methodChange()" checked>Multiple data sources</radio>

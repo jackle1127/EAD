@@ -386,7 +386,7 @@ function countryChanged() {
 		var url = "load-data-google-charts.jsp?country=" + value;
 		ajaxGeneric(url, function() {
 			if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-				rawData = xmlhttp.responseText
+				rawData = xmlhttp.responseText;
 				loadChartData(rawData);
 			}
 		});
