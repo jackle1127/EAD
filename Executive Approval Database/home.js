@@ -27,10 +27,10 @@ function loadChartData() {
 		});
 		slider.draw();
 	}
-	function hideDownloadLink() {
-		document.getElementById("aDownloadChart").style.display = "none";
+	function getDateString(date) {
+		return date.getMonth() + '/' + date.getDay() + '/' + date.getFullYear();
 	}
-	if (document.getElementById("rdioMultiSource").checked) {
+	if (document.getElementById("rdioMultiSource").checked) { // If multiple source method is selected
 		var googleData = new google.visualization.DataTable();
 		dataArray = [];
 		dateArray = [];
@@ -62,12 +62,15 @@ function loadChartData() {
 			var currentDate = dateArray[i / 3];
 			googleData.setValue(i, 1, new Date(currentDate));
 			googleData.setValue(i, 0, "Positive");
-			
+			googleData.setValue(i + 1, 1, new Date(currentDate));
+			googleData.setValue(i + 1, 0, "Net");
+			googleData.setValue(i + 2, 1, new Date(currentDate));
+			googleData.setValue(i + 2, 0, "Relative Approval");
 			for (var j = 0; j < seriesArray.length; j++) {
 				if (dataArray[currentDate] != null && dataArray[currentDate][seriesArray[j]] != null
 						 && dataArray[currentDate][seriesArray[j]]["Pos"] != null) {
 					googleData.setValue(i, 2 * j + 2, dataArray[currentDate][seriesArray[j]]["Pos"]);
-					var tooltip = getFullSeriesName(seriesArray[j]) + "\n%Positive: "
+					var tooltip = getFullSeriesName(seriesArray[j]) + "\nDate: " + getDateString(currentDate) + "\n%Positive: "
 							+ dataArray[currentDate][seriesArray[j]]["Pos"];
 					if (seriesInformation != null
 							&& seriesInformation[currentCountry] != null
@@ -78,14 +81,10 @@ function loadChartData() {
 					}
 					googleData.setValue(i, 2 * j + 3, tooltip);
 				}
-			}
-			googleData.setValue(i + 1, 1, new Date(currentDate));
-			googleData.setValue(i + 1, 0, "Net");
-			for (var j = 0; j < seriesArray.length; j++) {
 				if (dataArray[currentDate] != null && dataArray[currentDate][seriesArray[j]] != null
 						 && dataArray[currentDate][seriesArray[j]]["Net"] != null) {
 					googleData.setValue(i + 1, 2 * j + 2, dataArray[currentDate][seriesArray[j]]["Net"]);
-					var tooltip = getFullSeriesName(seriesArray[j]) + "\n%Net: "
+					var tooltip = getFullSeriesName(seriesArray[j]) + "\nDate: " + getDateString(currentDate) + "\n%Net: "
 							+ dataArray[currentDate][seriesArray[j]]["Net"];
 					if (seriesInformation != null
 							&& seriesInformation[currentCountry] != null
@@ -96,14 +95,10 @@ function loadChartData() {
 					}
 					googleData.setValue(i + 1, 2 * j + 3, tooltip);
 				}
-			}
-			googleData.setValue(i + 2, 1, new Date(currentDate));
-			googleData.setValue(i + 2, 0, "App/App + Dis");
-			for (var j = 0; j < seriesArray.length; j++) {
 				if (dataArray[currentDate] != null && dataArray[currentDate][seriesArray[j]] != null
 						 && dataArray[currentDate][seriesArray[j]]["AppAppDis"] != null) {
 					googleData.setValue(i + 2, 2 * j + 2, dataArray[currentDate][seriesArray[j]]["AppAppDis"]);
-					var tooltip = getFullSeriesName(seriesArray[j]) + "\n%App / (%App + %Dis): "
+					var tooltip = getFullSeriesName(seriesArray[j]) + "\nDate: " + getDateString(currentDate) + "\nRelative Approval: "
 							+ dataArray[currentDate][seriesArray[j]]["AppAppDis"];
 					if (seriesInformation != null
 							&& seriesInformation[currentCountry] != null
@@ -181,10 +176,11 @@ function loadChartData() {
 			'options': {
 				'filterColumnLabel': 'label',
 				ui: {
-					'label': 'Series filter',
+					'label': 'Visualize',
 					'allowTyping': false,
 					'allowMultiple': true,
-					'allowNone': true
+					'allowNone': true,
+					'caption': 'Series'
 				}
 			}
 		});
@@ -209,7 +205,7 @@ function loadChartData() {
 			calculationFilter.draw();
 			chart.setView({columns: chartColumns});
 			chart.draw();
-			hideDownloadLink();
+			hideChartDownloadLink();
 		}
 		google.visualization.events.addListener(seriesFilter, 'statechange', seriesFilterChange);
 		google.visualization.events.addListener(calculationFilter, 'statechange', function () {
@@ -225,7 +221,7 @@ function loadChartData() {
 		dashboard.draw(dataView);
 		seriesFilterChange();
 
-		google.visualization.events.addListener(calculationFilter, "statechange", hideDownloadLink);
+		google.visualization.events.addListener(calculationFilter, "statechange", hideChartDownloadLink);
 	} else { // If user chooses multiple calculations.
 		// Name dictionary to look up series information later. All abbreviated series names were replaced by full name
 		// but info can only be looked up using abbreviated name.
@@ -268,7 +264,7 @@ function loadChartData() {
 				'hAxis': {
 					'format': 'MMM, yyyy'
 				},
-				
+				'chartArea': {'left': '5%', 'width': '80%'},
 				'title': 'Executive approval rate',
 				'height': 500,
 				'width': '100%',
@@ -281,11 +277,6 @@ function loadChartData() {
 					'maxZoomIn': .01,
 					'maxZoomOut': 1,
 					'actions': ['dragToZoom', 'rightClickToReset']
-				}
-			},
-			'ui': {
-				'chartOptions': {
-					'chartArea': {'width': '80%'}
 				}
 			}
 		});
@@ -324,6 +315,9 @@ function loadChartData() {
 }
 
 function loadTable() {
+	function hideTableDownloadLink() {
+		document.getElementById("aDownloadTable").style.display = "none";
+	}
 	document.getElementById("imgTableLoading").style.display = "block";
 	document.getElementById("btnLoadTable").style.display = "none";
 	var tableDashboard = new google.visualization.Dashboard(
@@ -366,10 +360,6 @@ function loadTable() {
 		},
 	});
 	
-	function hideDownloadLink() {
-		document.getElementById("aDownloadTable").style.display = "none";
-	}
-
 	tableDashboard.bind(seriesFilterTable, dateFilterTable);
 	tableDashboard.bind(dateFilterTable, table);
 	tableDashboard.draw(rawDataTable);
@@ -378,12 +368,12 @@ function loadTable() {
 		document.getElementById("btnDownloadTable").style.display = "block";
 		document.getElementById("tableInfoTip").style.display = "block";
 		google.visualization.events.addListener(table.getChart(), "sort", function(e) {
-			hideDownloadLink();
+			hideTableDownloadLink();
 		});
 	});
 	
-	google.visualization.events.addListener(dateFilterTable, "statechange", hideDownloadLink);
-	google.visualization.events.addListener(seriesFilterTable, "statechange", hideDownloadLink);
+	google.visualization.events.addListener(dateFilterTable, "statechange", hideTableDownloadLink);
+	google.visualization.events.addListener(seriesFilterTable, "statechange", hideTableDownloadLink);
 }
 
 function countryChanged() {
@@ -399,18 +389,10 @@ function countryChanged() {
 			rawDataTable.setColumnLabel(1, 'Date');
 			rawDataTable.setColumnLabel(2, '%Positive');
 			rawDataTable.setColumnLabel(3, '%Net');
-			rawDataTable.setColumnLabel(4, '%App/%App + %Dis');
+			rawDataTable.setColumnLabel(4, 'Relative Approval');
 			loadChartData();
 		}
 		queryGoogleSheet(mainSheetId, "SELECT A, B, D, E, F WHERE H = '" + currentCountry + "' ORDER BY B", callBack);
-		/*
-		var url = "load-data-google-charts.jsp?country=" + value;
-		ajaxGeneric(url, function() {
-			if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-				rawData = xmlhttp.responseText;
-				loadChartData(rawData);
-			}
-		});*/
 	}
 }
 
@@ -454,13 +436,25 @@ function loadCountryNames() { // Function to get country names and series inform
 function queryGoogleSheet(id, queryString, callBack) {
 	var url = "https://docs.google.com/spreadsheets/d/" + id + "/gviz/tq?gid=0&headers=1";
 	var query = new google.visualization.Query(url);
+	query.headers = 1;
 	query.setQuery(queryString);
 	query.send(callBack);
 }
 
 function downloadChart() {
 	if (chart != null) {
-		var link = document.getElementById("aDownloadChart");
+		
+		var inputHeight = document.getElementById('heightInput').value;
+		var inputWidth = document.getElementById('widthInput').value;
+
+		if(inputHeight != '' && inputWidth != ''){
+			chart.setOption('height', inputHeight);
+			chart.setOption('width', inputWidth);
+			chart.draw();
+		}
+		
+		var previewLink = document.getElementById("aPreviewChart");
+		var downloadLink = document.getElementById("aDownloadChart");
 		var uri = chart.getChart().getImageURI();
 		var image = new Image;
 		image.src = uri;
@@ -476,11 +470,25 @@ function downloadChart() {
 			paddingLeft = canvas.width * paddingLeft / 100;
 			context.fillText("Source: The Executive Approval Project v.1.0", paddingLeft, canvas.height - 12);
 			var newURI = canvas.toDataURL();
-			link.href = newURI;
-			link.download = "executive-approval-" + document.getElementById("country").value + ".png";
-			link.style.display = "block";
+			previewLink.href = newURI;
+			previewLink.style.display = "block";
+			downloadLink.href = newURI;
+			downloadLink.download = "executive-approval-" + document.getElementById("country").value + ".png";
+			downloadLink.style.display = "block";
 		}
+		//Revert back the changes if originally changed
+		if(inputHeight != '' && inputWidth != ''){
+			chart.setOption('height', 500);
+			chart.setOption('width', '100%');
+			chart.draw();
+		}		
 	}
+}
+
+// Function to hide download links when uses make changes to the chart.
+function hideChartDownloadLink() {
+	document.getElementById("aPreviewChart").style.display = "none";
+	document.getElementById("aDownloadChart").style.display = "none";
 }
 
 function downloadTable() {

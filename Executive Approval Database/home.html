@@ -96,8 +96,17 @@
 			margin-right: 0;
 			margin-left: auto;
 		}
-		#aDownloadChart, #aDownloadTable {
+		#aDownloadChart, #aDownloadTable, #aPreviewChart {
 			display: none;
+		}
+		.sizeInput, .sizeInput *{
+			padding: 4px;
+			text-align: right;
+		}
+		.hide{
+			max-width: 100%;
+			max-height:500px;
+			overflow: hidden;
 		}
     </style>
 </head>
@@ -123,24 +132,32 @@
 		<img id="imgChartLoading" class="loadingIcon" src="loading.gif" alt="loading" />
 		<p id="questionWording" />
 		<div id="divDashboardChart">
-			<div id="divCalculationControl">
+			<div id="divCalculationControl" onfocus="hideChartDownloadLink()">
 			</div>
 			<br/>
-			<div id="divSeriesControl">
+			<div id="divSeriesControl" onfocus="hideChartDownloadLink()">
 			</div>
 			<br/>
-			<span class="info">(Drag on chart to zoom, right click to reset)</span>
-			<div id="divChart">
+			<span class="info">(Drag on graph to zoom, right click to reset)</span>
+			<div id="divChart" onfocus="hideChartDownloadLink()">
 			</div>
 			<br/>
 			<br/>
 		</div>
-		<button id="btnDownloadChart" onclick="downloadChart()">Download Chart</button>
+		<div class="sizeInput">
+			<span class="info">Custom width and height (leave blank for default size)</span><br/><br/>
+			Height
+			<input type="number" id="heightInput" onfocus="hideChartDownloadLink()"></input> px<br/>
+			Width
+			<input type="number" id="widthInput" onfocus="hideChartDownloadLink()"></input> px
+		</div>
+		<button id="btnDownloadChart" onclick="downloadChart()">Download Graph</button>
+		<a id="aPreviewChart" class="downloadLink" target="_blank">Preview in a new tab</a>
 		<a id="aDownloadChart" class="downloadLink">Download as PNG</a>
 		<br/>
 		<hr/>
 		<br/>
-		<button id="btnLoadTable" onclick="loadTable()">Load table</button>
+		<button id="btnLoadTable" onclick="loadTable()">Load data table</button>
 		<img id="imgTableLoading" class="loadingIcon" src="loading.gif" alt="loading" />
 		<div id="divDashboardTable">
 			<div id="divTableSeriesControl">
