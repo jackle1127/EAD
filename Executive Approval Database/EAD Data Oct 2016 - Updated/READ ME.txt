@@ -1,0 +1,53 @@
+Argentina
+Not pulling in LAPOP series
+
+Bolivia
+Not pulling in IPSOS-APOYO series
+
+Brazil
+Not pulling in Gallup series
+
+Chile
+Not pulling in CEP series
+
+Colombia
+Not pulling in CNC series
+
+Costa Rica
+Not pulling in CID-Gallup series
+
+Dominican Republic
+Not pulling in LAPOP series
+
+Ecuador
+Not pulling in CEDATOS series
+
+El Salvador
+Not pulling in CIMABORGE series
+
+Guatemala
+Not pulling in CID-Gallup series
+
+Honduras
+Not pulling in CIMABORGE series
+
+Mexico
+Not pulling in OPOPRM series
+
+Nicaragua
+Not pulling in LB series
+
+Panama
+Not pulling in LAPOP series
+
+Paraguay
+Not pulling in FIRST series
+
+Peru
+Not pulling in UdeLima, GfK or VoxPopuli series
+
+Uruguay
+Not pulling in CIMA series
+
+Venezuela
+Not pulling in C21 series

@@ -1,23 +1,31 @@
+const COOKIE_FIRST_NAME = 0;
+const COOKIE_LAST_NAME = 1;
+const COOKIE_EMAIL = 2;
+const COOKIE_AFFILIATION = 3;
+
 google.charts.load('current', {'packages':['controls', 'corechart', 'table']});
 google.charts.setOnLoadCallback(loadCountryNames);
-var mainSheetId = '1NGPqvcH7wkpWf84EpJE3RRoNvShXli_SDk6P3XZA1mY';
-var seriesInfoSheetId = '1xWm4ePMJRWQtJ0iufRtSTMk0FpW1xc3Dt7pyuTjzoF4';
+var mainSheetId = '1sm_8DP0YY6k3mUwqfOudphbI-Wdcl3LIRETK2nnB2JU';
+var seriesInfoSheetId = '1edCytqaKWUbRQnwMbUocTTZcC3DVGJ0jTFpEfu0qBys';
 var rawDataTable; // Global Google datatable object
 var table;
 var chart;
 var seriesInformation, currentCountry;
 
+// Determine what to do after prompting user info.
+var currentDownloadAction;
+function getFullSeriesName(abbreviation) {
+	if (seriesInformation != null
+			&& seriesInformation[currentCountry] != null
+			&& seriesInformation[currentCountry][abbreviation] != null) {
+		return seriesInformation[currentCountry][abbreviation]['description'];
+	} else {
+		return abbreviation;
+	}
+}
 function loadChartData() {
 	document.getElementById("questionWording").innerText = "";
-	function getFullSeriesName(abbreviation) {
-		if (seriesInformation != null
-				&& seriesInformation[currentCountry] != null
-				&& seriesInformation[currentCountry][abbreviation] != null) {
-			return seriesInformation[currentCountry][abbreviation]['description'];
-		} else {
-			return abbreviation;
-		}
-	}
+	
 	function resetSlider(slider) {
 		slider.setState({
 			range: {
@@ -44,7 +52,8 @@ function loadChartData() {
 			}
 			
 			dataArray[currentDate][rawDataTable.getValue(i, 0)] = {"Pos": rawDataTable.getValue(i, 2),
-					"Net": rawDataTable.getValue(i, 3), "AppAppDis": rawDataTable.getValue(i, 4)};
+					"Neg": rawDataTable.getValue(i, 3), "Net": rawDataTable.getValue(i, 4),
+					"AppAppDis": rawDataTable.getValue(i, 5)};
 			seriesArray.push(rawDataTable.getValue(i, 0));
 		}
 		dateArray = Array.from(new Set(dateArray));
@@ -56,16 +65,18 @@ function loadChartData() {
 			googleData.addColumn('number', getFullSeriesName(seriesArray[i]));
 			googleData.addColumn({'type': 'string', 'role': 'tooltip'});
 		}
-		googleData.addRows(dateArray.length * 3);
+		googleData.addRows(dateArray.length * 4);
 		
-		for (var i = 0; i < dateArray.length * 3; i += 3) {
-			var currentDate = dateArray[i / 3];
+		for (var i = 0; i < dateArray.length * 4; i += 4) {
+			var currentDate = dateArray[i / 4];
 			googleData.setValue(i, 1, new Date(currentDate));
 			googleData.setValue(i, 0, "Positive");
 			googleData.setValue(i + 1, 1, new Date(currentDate));
-			googleData.setValue(i + 1, 0, "Net");
+			googleData.setValue(i + 1, 0, "Negative");
 			googleData.setValue(i + 2, 1, new Date(currentDate));
-			googleData.setValue(i + 2, 0, "Relative Approval");
+			googleData.setValue(i + 2, 0, "Net");
+			googleData.setValue(i + 3, 1, new Date(currentDate));
+			googleData.setValue(i + 3, 0, "Relative Approval");
 			for (var j = 0; j < seriesArray.length; j++) {
 				if (dataArray[currentDate] != null && dataArray[currentDate][seriesArray[j]] != null
 						 && dataArray[currentDate][seriesArray[j]]["Pos"] != null) {
@@ -82,10 +93,10 @@ function loadChartData() {
 					googleData.setValue(i, 2 * j + 3, tooltip);
 				}
 				if (dataArray[currentDate] != null && dataArray[currentDate][seriesArray[j]] != null
-						 && dataArray[currentDate][seriesArray[j]]["Net"] != null) {
-					googleData.setValue(i + 1, 2 * j + 2, dataArray[currentDate][seriesArray[j]]["Net"]);
-					var tooltip = getFullSeriesName(seriesArray[j]) + "\nDate: " + getDateString(currentDate) + "\n%Net: "
-							+ dataArray[currentDate][seriesArray[j]]["Net"];
+						 && dataArray[currentDate][seriesArray[j]]["Neg"] != null) {
+					googleData.setValue(i + 1, 2 * j + 2, dataArray[currentDate][seriesArray[j]]["Neg"]);
+					var tooltip = getFullSeriesName(seriesArray[j]) + "\nDate: " + getDateString(currentDate) + "\n%Negative: "
+							+ dataArray[currentDate][seriesArray[j]]["Neg"];
 					if (seriesInformation != null
 							&& seriesInformation[currentCountry] != null
 							&& seriesInformation[currentCountry][seriesArray[j]] != null) {
@@ -96,8 +107,22 @@ function loadChartData() {
 					googleData.setValue(i + 1, 2 * j + 3, tooltip);
 				}
 				if (dataArray[currentDate] != null && dataArray[currentDate][seriesArray[j]] != null
+						 && dataArray[currentDate][seriesArray[j]]["Net"] != null) {
+					googleData.setValue(i + 2, 2 * j + 2, dataArray[currentDate][seriesArray[j]]["Net"]);
+					var tooltip = getFullSeriesName(seriesArray[j]) + "\nDate: " + getDateString(currentDate) + "\n%Net: "
+							+ dataArray[currentDate][seriesArray[j]]["Net"];
+					if (seriesInformation != null
+							&& seriesInformation[currentCountry] != null
+							&& seriesInformation[currentCountry][seriesArray[j]] != null) {
+						var info = seriesInformation[currentCountry][seriesArray[j]];
+						tooltip	+= "\nQuestion type: " + (info["questionType"] == "" ? "Unavailable" : info["questionType"])
+								+ "\nQuestion wording: " + (info["questionWording"] == "" ? "Unavailable" : info["questionWording"]);
+					}
+					googleData.setValue(i + 2, 2 * j + 3, tooltip);
+				}
+				if (dataArray[currentDate] != null && dataArray[currentDate][seriesArray[j]] != null
 						 && dataArray[currentDate][seriesArray[j]]["AppAppDis"] != null) {
-					googleData.setValue(i + 2, 2 * j + 2, dataArray[currentDate][seriesArray[j]]["AppAppDis"]);
+					googleData.setValue(i + 3, 2 * j + 2, dataArray[currentDate][seriesArray[j]]["AppAppDis"]);
 					var tooltip = getFullSeriesName(seriesArray[j]) + "\nDate: " + getDateString(currentDate) + "\nRelative Approval: "
 							+ dataArray[currentDate][seriesArray[j]]["AppAppDis"];
 					if (seriesInformation != null
@@ -107,7 +132,7 @@ function loadChartData() {
 						tooltip	+= "\nQuestion type: " + (info["questionType"] == "" ? "Unavailable" : info["questionType"])
 								+ "\nQuestion wording: " + (info["questionWording"] == "" ? "Unavailable" : info["questionWording"]);
 					}
-					googleData.setValue(i + 2, 2 * j + 3, tooltip);
+					googleData.setValue(i + 3, 2 * j + 3, tooltip);
 				}
 			}
 		}
@@ -127,9 +152,11 @@ function loadChartData() {
 					'label': 'Calculation Method',
 					'allowTyping': false,
 					'allowMultiple': false,
-					'allowNone': false
+					'allowNone': false,
+					'selectedValuesLayout': 'belowStacked'
 				}
-			}
+			},
+			'state': {'selectedValues': ['Positive']}
 		});
 		
 		chart = new google.visualization.ChartWrapper({
@@ -179,7 +206,7 @@ function loadChartData() {
 					'label': 'Visualize',
 					'allowTyping': false,
 					'allowMultiple': true,
-					'allowNone': true,
+					'allowNone': false,
 					'caption': 'Series'
 				}
 			}
@@ -209,6 +236,7 @@ function loadChartData() {
 		}
 		google.visualization.events.addListener(seriesFilter, 'statechange', seriesFilterChange);
 		google.visualization.events.addListener(calculationFilter, 'statechange', function () {
+			seriesFilter.setState({'state': {'selectedValues': [getFullSeriesName(seriesArray[0])]}});
 			if (calculationFilter.getState().selectedValues[0] == 'Net') {
 				chart.setOption('vAxis', {'minValue': -100 ,'maxValue': 100});
 			} else {
@@ -254,7 +282,7 @@ function loadChartData() {
 		chart = new google.visualization.ChartWrapper({
 			'chartType': 'LineChart',
 			'containerId': 'divChart',
-			'view': {'columns': [1, 2, 3, 4]},
+			'view': {'columns': [1, 2, 3, 4, 5]},
 			'options': {
 				'vAxis': {
 					'minValue': -100,
@@ -388,11 +416,12 @@ function countryChanged() {
 			rawDataTable.setColumnLabel(0, 'Source');
 			rawDataTable.setColumnLabel(1, 'Date');
 			rawDataTable.setColumnLabel(2, '%Positive');
-			rawDataTable.setColumnLabel(3, '%Net');
-			rawDataTable.setColumnLabel(4, 'Relative Approval');
+			rawDataTable.setColumnLabel(3, '%Negative');
+			rawDataTable.setColumnLabel(4, '%Net');
+			rawDataTable.setColumnLabel(5, 'Relative Approval');
 			loadChartData();
 		}
-		queryGoogleSheet(mainSheetId, "SELECT A, B, D, E, F WHERE H = '" + currentCountry + "' ORDER BY B", callBack);
+		queryGoogleSheet(mainSheetId, "SELECT A, B, D, F, G, H WHERE J = '" + currentCountry + "' ORDER BY B", callBack);
 	}
 }
 
@@ -428,7 +457,7 @@ function loadCountryNames() { // Function to get country names and series inform
 			}
 			document.getElementById("country").innerHTML += countryHTML;
 		}
-		queryGoogleSheet(mainSheetId, 'SELECT H, COUNT(A) GROUP BY H', callBackMain);
+		queryGoogleSheet(mainSheetId, 'SELECT J, COUNT(A) GROUP BY J', callBackMain);
 	}
 	queryGoogleSheet(seriesInfoSheetId, 'SELECT *', callBackSeriesInformation);
 }
@@ -441,9 +470,57 @@ function queryGoogleSheet(id, queryString, callBack) {
 	query.send(callBack);
 }
 
+function submitInfo() {
+	var firstName = document.getElementsByName("firstName")[0].value.trim();
+	var lastName = document.getElementsByName("lastName")[0].value.trim();
+	var email = document.getElementsByName("email")[0].value.trim();
+	var affiliation = document.getElementsByName("affiliation")[0].value.trim();
+	if (firstName == "" || lastName == "" || email == "" || affiliation == "") {
+		alert("Please fill out all required information.")
+		return;
+	}
+	var cookie = "data=" + firstName;
+	cookie += "|" + lastName;
+	cookie += "|" + email;
+	cookie += "|" + affiliation;
+	document.cookie = cookie;
+	currentDownloadAction();
+	currentDownloadAction = null;
+	hideInfo();
+}
+
+function getAttributeFromCookie(index) {
+	var cookies = document.cookie.split("=")[1].split("|");
+	if (index < cookies.length) return cookies[index];
+	return null;
+}
+
+function checkCookie() {
+	if (document.cookie == "") {
+		return false;
+	} else {
+		return true;
+	}
+}
+
+function logDownload(type) {
+	var args = "firstName=" + getAttributeFromCookie(COOKIE_FIRST_NAME);
+	args += "&lastName=" + getAttributeFromCookie(COOKIE_LAST_NAME);
+	args += "&email=" + getAttributeFromCookie(COOKIE_EMAIL);
+	args += "&affiliation=" + getAttributeFromCookie(COOKIE_AFFILIATION);
+	args += "&type=" + type;
+	args += "&country=" + currentCountry;
+	ajaxPost("log.php", args, null);
+}
+
 function downloadChart() {
+	if (!checkCookie()) {
+		currentDownloadAction = function() {downloadChart();};
+		showInfo();
+		return;
+	}
+	logDownload("Chart");
 	if (chart != null) {
-		
 		var inputHeight = document.getElementById('heightInput').value;
 		var inputWidth = document.getElementById('widthInput').value;
 
@@ -492,6 +569,12 @@ function hideChartDownloadLink() {
 }
 
 function downloadTable() {
+	if (!checkCookie()) {
+		currentDownloadAction = function() {downloadTable();};
+		showInfo();
+		return;
+	}
+	logDownload("Table");
 	if (table != null) {
 		var csv = "";
 		var sortedIndexes = table.getChart().getSortInfo()['sortedIndexes'];
@@ -524,7 +607,23 @@ function downloadTable() {
 	}
 }
 
-function ajaxGeneric(url, func) {
+function hideInfo() {
+	document.getElementById("infoDiv").style.opacity = 0;
+	setTimeout(function() {
+		document.getElementById("mainDiv").style.filter = "blur(0)";
+		document.getElementById("infoDiv").style.display = "none";
+		document.getElementById("middleLayer").style.display = "none";	
+	}, 200);
+}
+
+function showInfo() {
+	document.getElementById("infoDiv").style.display = "block";
+	document.getElementById("infoDiv").style.opacity = 1;
+	document.getElementById("mainDiv").style.filter = "blur(5px)";
+	document.getElementById("middleLayer").style.display = "block";	
+}
+
+function ajaxPost(url, args, func) {
     if (window.XMLHttpRequest) {
         // code for IE7+, Firefox, Chrome, Opera, Safari
         xmlhttp = new XMLHttpRequest();
@@ -535,6 +634,7 @@ function ajaxGeneric(url, func) {
     }
 
     xmlhttp.onreadystatechange = func;
-    xmlhttp.open("GET", url, false);
-    xmlhttp.send(null);
+    xmlhttp.open("POST", url, true);
+	xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+    xmlhttp.send(args);
 }

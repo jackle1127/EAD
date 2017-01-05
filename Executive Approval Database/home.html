@@ -11,7 +11,7 @@
 	
     <style>
         body {
-            background-color: #b0c4de;
+            background-color: #FFFFFF;
 			font-family: Montserrat, Verdana;
 			padding: 30px;
         }
@@ -26,6 +26,7 @@
 		}
 		#banner {
 			text-align: center;
+			
 		}
 		#leftCell {
 			width: 20%;
@@ -41,24 +42,17 @@
 		#divChart {
 			display: block;
 		}
-		#divBottom {
-			background-color: #FFFFFF;
+		#divFilter {
 			display: block;
-			background-color: #FFFFFF;
-			border: 2px solid #66FF99;
-			border-radius: 15px;
-			font-weight: bold;
-			padding: 20px;
+		}
+		#divBottom {
 			text-align: left;
 			display: none;
 		}
-		#divFilter {
-			display: block;
-			background-color: #FFFFFF;
-			border: 2px solid #66FF99;
-			border-radius: 15px;
+		#divFilter, #divBottom {
 			padding: 20px;
-			font-weight: bold;
+			background-color: #FFFFFF;
+			border: 1px solid #CCCCCC;
 		}
 		#divTableDateControl {
 			display: block;
@@ -69,7 +63,8 @@
 		}
 		Button {
 			font-size: 24px;
-			border-radius: 5px;
+			border: 3px solid #000000;
+			background-color: #FFFFFF;
 			padding: 6px;
 			font-family: Montserrat, Verdana;
 		}
@@ -86,8 +81,8 @@
 			margin-right: 0;
 			margin-left: auto;
 			font-size: 12px;
-			background-color: #A432FF;
-			color: #FFFFFF;
+			background-color: #FFFFFF;
+			color: #000000;
 		}
 		.downloadLink {
 			color: #FF8484;
@@ -108,71 +103,133 @@
 			max-height:500px;
 			overflow: hidden;
 		}
+		#infoTable input {
+			height: 40px;
+			width: 100%;
+			font-size: 24px;
+			font-family: Montserrat, Verdana;
+		}
+		#infoTable td {
+			padding-right: 10px;
+		}
+		#infoTable {
+			width: 100%;
+		}
+		#infoDiv {
+			display: none;
+			background: #FFFFFF;
+			padding: 40px;
+			width: 400px;
+			border: 2px solid #000000;
+			border-radius: 15px;
+			position: fixed;
+			margin-left: 50%;
+			transform: translate(-50%, 0);
+			z-index: 100;
+			transition: all .3s;
+			box-shadow: 10px 10px 20px #888888;
+		}
+		.smallInfo {
+			font-size: 80%;
+		}
+		#infoButtonRow td {
+			text-align: center;
+		}
+		#middleLayer {
+			display: none;
+			position: fixed;
+			width: 100%;
+			height: 100%;
+			z-index: 50;
+		}
     </style>
 </head>
 <body>
-	<h2 id="banner">Executive Approval Database Visualization</h2>
-	<div id="divFilter">
-		<table>
+	<div id="infoDiv">
+		<table id="infoTable">
+			<tr><td colspan=2>Name*</td></tr>
+			<tr><td><input name="firstName" /></td><td><input name="lastName" /></td></tr>
 			<tr>
-				<td>Country:</td>
-				<td>
-					<select id="country" onchange = "countryChanged();">
-					</select>
-				</td>
-				<td>
-					<input type="radio" name="calculationMethod" id="rdioMultiSource" onclick="methodChange()" checked>Multiple data sources</radio>
-					<input type="radio" name="calculationMethod" id="rdioMultiMethod" onclick="methodChange()">Multiple calculation methods</radio>
-				</td>
+				<td><span class="smallInfo">First Name</span></td>
+				<td><span class="smallInfo">Last Name</span></td>
+			</tr>
+			<tr><td colspan=2>Email Address*</td></tr>
+			<tr><td colspan=2><input name="email" /></td></tr>
+			<tr><td colspan=2>Affiliation*</td></tr>
+			<tr><td colspan=2><input name="affiliation" /></td></tr>
+			<tr id="infoButtonRow">
+				<td><button onclick="hideInfo()">Cancel</button></td>
+				<td><button onclick="submitInfo()">Submit</button></td>
 			</tr>
 		</table>
 	</div>
-	<br/>	
-	<div id="divBottom">
-		<img id="imgChartLoading" class="loadingIcon" src="loading.gif" alt="loading" />
-		<p id="questionWording" />
-		<div id="divDashboardChart">
-			<div id="divCalculationControl" onfocus="hideChartDownloadLink()">
-			</div>
-			<br/>
-			<div id="divSeriesControl" onfocus="hideChartDownloadLink()">
-			</div>
-			<br/>
-			<span class="info">(Drag on graph to zoom, right click to reset)</span>
-			<div id="divChart" onfocus="hideChartDownloadLink()">
-			</div>
-			<br/>
-			<br/>
-		</div>
-		<div class="sizeInput">
-			<span class="info">Custom width and height (leave blank for default size)</span><br/><br/>
-			Height
-			<input type="number" id="heightInput" onfocus="hideChartDownloadLink()"></input> px<br/>
-			Width
-			<input type="number" id="widthInput" onfocus="hideChartDownloadLink()"></input> px
-		</div>
-		<button id="btnDownloadChart" onclick="downloadChart()">Download Graph</button>
-		<a id="aPreviewChart" class="downloadLink" target="_blank">Preview in a new tab</a>
-		<a id="aDownloadChart" class="downloadLink">Download as PNG</a>
-		<br/>
-		<hr/>
-		<br/>
-		<button id="btnLoadTable" onclick="loadTable()">Load data table</button>
-		<img id="imgTableLoading" class="loadingIcon" src="loading.gif" alt="loading" />
-		<div id="divDashboardTable">
-			<div id="divTableSeriesControl">
-			</div>
-			<br/>
-			<div id="divTableDateControl">
-			</div>
-			<span id='tableInfoTip' class="info">(Click on column label to sort by that column)</span>
-			<br/>
-			<div id="divTable">
-			</div>
+	<div id="middleLayer" onclick="hideInfo()"></div>
+	<div id="mainDiv">
+		<h2 id="banner">Executive Approval Database Visualization</h2>
+		<div id="divFilter">
+			<table>
+				<tr>
+					<td>Country:</td>
+					<td>
+						<select id="country" onchange = "countryChanged();">
+						</select>
+					</td>
+					<td>
+						<input type="radio" name="calculationMethod" id="rdioMultiSource" onclick="methodChange()" checked>Multiple data sources</radio>
+						<input type="radio" name="calculationMethod" id="rdioMultiMethod" onclick="methodChange()">Multiple calculation methods</radio>
+					</td>
+				</tr>
+			</table>
 		</div>
 		<br/>
-		<button id="btnDownloadTable" onclick="downloadTable()">Download Table</button>
-		<a id="aDownloadTable" class="downloadLink">Download as CSV</a>
+		<div id="divBottom">
+			<img id="imgChartLoading" class="loadingIcon" src="loading.gif" alt="loading" />
+			<p id="questionWording" />
+			<div id="divDashboardChart">
+				<div id="divCalculationControl" onfocus="hideChartDownloadLink()">
+				</div>
+				<br/>
+				<div id="divSeriesControl" onfocus="hideChartDownloadLink()">
+				</div>
+				<br/>
+				<span class="info">(Drag on graph to zoom, right click to reset)</span>
+				<div id="divChart" onfocus="hideChartDownloadLink()">
+				</div>
+				<br/>
+				<br/>
+			</div>
+			<div class="sizeInput">
+				<span class="info">Custom width and height (leave blank for default size)
+				<br/>NOTE: This will reset the zooming on the graph.
+				</span><br/><br/>
+				Height
+				<input type="number" id="heightInput" onfocus="hideChartDownloadLink()"></input> px<br/>
+				Width
+				<input type="number" id="widthInput" onfocus="hideChartDownloadLink()"></input> px
+			</div>
+			<button id="btnDownloadChart" onclick="downloadChart()">Download Graph</button>
+			<a id="aPreviewChart" class="downloadLink" target="_blank">Preview in a new tab</a>
+			<a id="aDownloadChart" class="downloadLink">Download as PNG</a>
+			<br/>
+			<hr/>
+			<br/>
+			<button id="btnLoadTable" onclick="loadTable()">Load data table</button>
+			<img id="imgTableLoading" class="loadingIcon" src="loading.gif" alt="loading" />
+			<div id="divDashboardTable">
+				<div id="divTableSeriesControl">
+				</div>
+				<br/>
+				<div id="divTableDateControl">
+				</div>
+				<span id='tableInfoTip' class="info">(Click on column label to sort by that column)</span>
+				<br/>
+				<div id="divTable">
+				</div>
+			</div>
+			<br/>
+			<button id="btnDownloadTable" onclick="downloadTable()">Download Table</button>
+			<a id="aDownloadTable" class="downloadLink">Download as CSV</a>
+		</div>
 	</div>
 </body>
 </html>
