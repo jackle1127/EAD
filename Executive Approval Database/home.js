@@ -10,7 +10,7 @@ var seriesInfoSheetId = '1edCytqaKWUbRQnwMbUocTTZcC3DVGJ0jTFpEfu0qBys';
 var rawDataTable; // Global Google datatable object
 var table;
 var chart;
-var seriesInformation, currentCountry;
+var seriesInformation, seriesFilter, currentCountry;
 
 // Determine what to do after prompting user info.
 var currentDownloadAction;
@@ -51,9 +51,9 @@ function loadChartData() {
 				dateArray.push(currentDate);
 			}
 			
-			dataArray[currentDate][rawDataTable.getValue(i, 0)] = {"Pos": rawDataTable.getValue(i, 2),
-					"Neg": rawDataTable.getValue(i, 3), "Net": rawDataTable.getValue(i, 4),
-					"AppAppDis": rawDataTable.getValue(i, 5)};
+			dataArray[currentDate][rawDataTable.getValue(i, 0)] = {"Pos": rawDataTable.getValue(i, 3),
+					"Neg": rawDataTable.getValue(i, 4), "Net": rawDataTable.getValue(i, 5),
+					"AppAppDis": rawDataTable.getValue(i, 6)};
 			seriesArray.push(rawDataTable.getValue(i, 0));
 		}
 		dateArray = Array.from(new Set(dateArray));
@@ -196,7 +196,7 @@ function loadChartData() {
 			seriesTable.addRows([[2 * i + 2, getFullSeriesName(seriesArray[i])]]);
 		}
 		
-		var seriesFilter = new google.visualization.ControlWrapper({
+		seriesFilter = new google.visualization.ControlWrapper({
 			'controlType': 'CategoryFilter',
 			'containerId': 'divSeriesControl',
 			'dataTable': seriesTable,
@@ -211,6 +211,10 @@ function loadChartData() {
 				}
 			}
 		});
+		
+		console.log("seriesFilter:");
+		console.log(seriesFilter);
+		
 		function seriesFilterChange() {
 			var state = seriesFilter.getState();
 			var row;
@@ -265,7 +269,7 @@ function loadChartData() {
 
 		document.getElementById("divCalculationControl").style.display = "none";
  
-		var seriesFilter = new google.visualization.ControlWrapper({
+		seriesFilter = new google.visualization.ControlWrapper({
 			'controlType': 'CategoryFilter',
 			'containerId': 'divSeriesControl',
 			'options': {
@@ -415,13 +419,14 @@ function countryChanged() {
 			rawDataTable = response.getDataTable();
 			rawDataTable.setColumnLabel(0, 'Source');
 			rawDataTable.setColumnLabel(1, 'Date');
-			rawDataTable.setColumnLabel(2, '%Positive');
-			rawDataTable.setColumnLabel(3, '%Negative');
-			rawDataTable.setColumnLabel(4, '%Net');
-			rawDataTable.setColumnLabel(5, 'Relative Approval');
+            rawDataTable.setColumnLabel(2, 'Sample');
+			rawDataTable.setColumnLabel(3, '%Positive');
+			rawDataTable.setColumnLabel(4, '%Negative');
+			rawDataTable.setColumnLabel(5, '%Net');
+			rawDataTable.setColumnLabel(6, 'Relative Approval');
 			loadChartData();
 		}
-		queryGoogleSheet(mainSheetId, "SELECT A, B, D, F, G, H WHERE J = '" + currentCountry + "' ORDER BY B", callBack);
+		queryGoogleSheet(mainSheetId, "SELECT A, B, C, D, F, G, H WHERE J = '" + currentCountry + "' ORDER BY B", callBack);
 	}
 }
 
@@ -637,4 +642,82 @@ function ajaxPost(url, args, func) {
     xmlhttp.open("POST", url, true);
 	xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
     xmlhttp.send(args);
+} 
+
+var groups = {};
+
+// Format the data as tab-separated variables for WCalc
+function constructTsv(){
+	var dataTsv = "";
+	for(var i = 0; i < rawDataTable.getNumberOfRows(); i++){
+		console.log(i);
+		var rawName = rawDataTable.getValue(i, 0);
+		if(typeof seriesInformation[currentCountry] == 'undefied'){
+			console.log("Warning! " + currentCountry + " could not be found! Perhaps it is mispelled in the database?");
+		}
+		if(typeof seriesInformation[currentCountry][rawName] == 'undefined'){
+			var name = rawName;
+		}else{
+			var name = seriesInformation[currentCountry][rawName].description;
+		}
+		var date = new Date(rawDataTable.getValue(i, 1));
+		date = date.getMonth() + "/" + date.getDate() + "/" + date.getFullYear();
+		var sample = rawDataTable.getValue(i, 2);
+        // substitute unvailable sample-sizes with 1000
+		if(isNaN(sample) || sample == null){
+			sample = 1000;
+		}
+		var pos = rawDataTable.getValue(i, 3);
+		if(pos == null || isNaN(pos) || date == null){
+			continue;
+		}
+		if(groups[name] == null){
+			groups[name] = [];
+		}
+		groups[name].push([date, pos, sample]);
+		//dataTsv = dataTsv + name + "\t" + date + "\t" + pos + "\t" + sample + "\n";
+	}
+	var dataSelectionForm = document.getElementById('dataSelectionForm');
+	var dataSelection = getRadioVal(dataSelectionForm, 'dataSelection');
+	if(dataSelection == 'allData'){
+		for(var name in groups){
+			// skip datapoints with only one entry
+			if(groups[name].length == 1){
+				continue;
+			}
+			for(var i = 0; i < groups[name].length; i++){
+				dataTsv = dataTsv + name + "\t" + groups[name][i][0] + "\t" + groups[name][i][1] + "\t" + groups[name][i][2] + "\n";
+			}
+		}
+	}else{
+		var selectedValuesArray = seriesFilter.getState().selectedValues;
+		for(var i = 0; i < selectedValuesArray.length; i++){
+			// skip datapoints with only one entry
+			var name = selectedValuesArray[i];
+			if(groups[name].length == 1){
+				continue;
+			}
+			for(var j = 0; j < groups[name].length; j++){
+				dataTsv = dataTsv + name + "\t" + groups[name][j][0] + "\t" + groups[name][j][1] + "\t" + groups[name][j][2] + "\n";
+			}
+		}
+	}
+	console.log("groups");
+	console.log(groups);
+	return dataTsv;
+}
+
+// Begin the data aggregation process
+function aggregateData(div){
+	if(div.innerHTML != "Proceed"){
+		$("#result").fadeOut("slow");
+		$("#aggregationOptions").fadeIn("slow");
+		div.innerHTML = "Proceed";
+	}else{
+		$("#aggregationOptions").fadeOut("slow");
+		var dataTsv = constructTsv();
+		feedData(dataTsv);
+		div.innerHTML = "Aggregate Data";
+		$("#result").fadeIn("slow");
+	}
 }

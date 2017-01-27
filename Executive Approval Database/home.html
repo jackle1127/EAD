@@ -2,19 +2,20 @@
 <html>
 
 <head>
-    <meta charset="UTF-8">
-    <title>Exective Approval</title>
+	<meta charset="UTF-8">
+	<title>Exective Approval</title>
 	<link href='https://fonts.googleapis.com/css?family=Montserrat' rel='stylesheet' type='text/css'>
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.2/jquery.min.js"></script>
 	<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-    <script type="text/JavaScript" src="home.js"></script>
+	<script type="text/javaScript" src="home.js"></script>
+	<script type="text/javascript" src="WCalc.js"></script>
 	
-    <style>
-        body {
-            background-color: #FFFFFF;
+	<style>
+		body {
+			background-color: #FFFFFF;
 			font-family: Montserrat, Verdana;
 			padding: 30px;
-        }
+		}
 		#countries {
 			font-family: Montserrat, Verdana;
 		}
@@ -142,7 +143,39 @@
 			height: 100%;
 			z-index: 50;
 		}
-    </style>
+		#aggregationOptions {
+			width: 333px;
+			text-align: left;
+			border: 1px solid lightgrey;
+			background-color: white;
+			padding: 10px 7px 10px 14px;
+			top: 100px;
+			left: auto;
+			display: none;
+		}
+		#result {
+			width: calc(100% - 23px);
+			margin: none;
+			border: none;
+			background-color: white;
+			padding: 10px;
+			display: none;
+		}
+		#result table {
+			border: 1px solid lightgrey;
+		}
+		#result table * {
+			border: none;
+		}
+		#moodAverages {
+			width: 100%;
+			border: 1px solid lightgrey;
+		}
+		#moodAverages table {
+			width: 300px !important;
+			border: none;
+		}
+	</style>
 </head>
 <body>
 	<div id="infoDiv">
@@ -229,6 +262,38 @@
 			<br/>
 			<button id="btnDownloadTable" onclick="downloadTable()">Download Table</button>
 			<a id="aDownloadTable" class="downloadLink">Download as CSV</a>
+			<button id="btnAggregateData" onclick="aggregateData(this)">Aggregate Data</button>
+			<div id="aggregationOptions">
+				<form id="controls">
+					<input type="checkbox" id="smoothing" checked>
+					<label>Smoothing</label>
+					<br><br>
+					<label><b>Aggregation Period:</b></label>
+					<br>
+					<input type="radio" name="aggregation" id="monthly">
+					<label>Monthly</label>
+					<br>
+					<input type="radio" name="aggregation" id="quarterly">
+					<label>Quarterly</label>
+					<br>					
+					<input type="radio" name="aggregation" id="yearly" checked="checked">
+					<label>Annually</label>
+					<br>
+				</form>
+				<form id="dataSelectionForm">
+					<br>
+					<label><b>Data Selection</b></label>
+					<br>
+					<input type="radio" name="dataSelection" id="allData" checked="checked">
+					<label><i>Full Information:</i> All Available Series</label>
+					<br>
+					<input type="radio" name="dataSelection" id="customData">
+					<label><i>Custom:</i> Only Series Graphed Above</label>
+					<br>
+				</form>
+			</div>
+			<div id="result">
+			</div>
 		</div>
 	</div>
 </body>
