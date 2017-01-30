@@ -654,15 +654,6 @@ function constructTsv(){
 	for(var i = 0; i < rawDataTable.getNumberOfRows(); i++){
 		console.log(i);
 		var rawName = rawDataTable.getValue(i, 0);
-		/*if(typeof seriesInformation[currentCountry] == 'undefined'){
-			console.log("Warning! " + currentCountry + " could not be found! Perhaps it is mispelled in the database?");
-			var name = rawName;
-		}
-		else if(typeof seriesInformation[currentCountry][rawName] == 'undefined'){
-			var name = rawName;
-		}else{
-			var name = seriesInformation[currentCountry][rawName].description;
-		}*/
 		var name = getFullSeriesName(rawName);
 		var date = new Date(rawDataTable.getValue(i, 1));
 		date = date.getMonth() + "/" + date.getDate() + "/" + date.getFullYear();
@@ -685,8 +676,10 @@ function constructTsv(){
 	var dataSelection = getRadioVal(dataSelectionForm, 'dataSelection');
 	if(dataSelection == 'allData'){
 		for(var name in groups){
-			// skip datapoints with only one entry
-			if(groups[name].length == 1){
+			if(typeof(groups[name]) == 'undefined'){
+				continue;
+			}
+			if(groups[name].length == 1){ // skip datapoints with only one entry
 				continue;
 			}
 			for(var i = 0; i < groups[name].length; i++){
@@ -696,9 +689,11 @@ function constructTsv(){
 	}else{
 		var selectedValuesArray = seriesFilter.getState().selectedValues;
 		for(var i = 0; i < selectedValuesArray.length; i++){
-			// skip datapoints with only one entry
 			var name = selectedValuesArray[i];
-			if(groups[name].length == 1){
+			if(typeof(groups[name]) == 'undefined'){
+				continue;
+			}
+			if(groups[name].length == 1){ // skip datapoints with only one entry
 				continue;
 			}
 			for(var j = 0; j < groups[name].length; j++){
