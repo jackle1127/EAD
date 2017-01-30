@@ -181,11 +181,20 @@
 			position: absolute;
 			top: 20px;
 			left: 20px;
+			display: block;
+		}
+		@media (max-width: 1100px) {
+			#logo {
+				position: relative;
+				display: block;
+				margin-left: -40px;
+				margin-top: -40px;
+			}
 		}
 	</style>
 </head>
 <body>
-	<img id='logo' src="sif_logo.png">
+	<a href="http://sites.gsu.edu/innovation/"><img id='logo' src="sif_logo.png"></a>
 	<div id="infoDiv">
 		<table id="infoTable">
 			<tr><td colspan=2>Name*</td></tr>
