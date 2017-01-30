@@ -286,7 +286,7 @@ function loadChartData() {
 		chart = new google.visualization.ChartWrapper({
 			'chartType': 'LineChart',
 			'containerId': 'divChart',
-			'view': {'columns': [1, 2, 3, 4, 5]},
+			'view': {'columns': [1, 3, 4, 5, 6]},
 			'options': {
 				'vAxis': {
 					'minValue': -100,
