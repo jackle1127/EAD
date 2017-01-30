@@ -409,6 +409,8 @@ function loadTable() {
 }
 
 function countryChanged() {
+	var aggregationResult = document.getElementById('result');
+	aggregationResult.style.display = "none";
 	var countryElement = document.getElementById("country");
 	if (countryElement.selectedIndex > 0) {
 		var value = countryElement.options[countryElement.selectedIndex].value;
@@ -652,14 +654,16 @@ function constructTsv(){
 	for(var i = 0; i < rawDataTable.getNumberOfRows(); i++){
 		console.log(i);
 		var rawName = rawDataTable.getValue(i, 0);
-		if(typeof seriesInformation[currentCountry] == 'undefied'){
+		/*if(typeof seriesInformation[currentCountry] == 'undefined'){
 			console.log("Warning! " + currentCountry + " could not be found! Perhaps it is mispelled in the database?");
+			var name = rawName;
 		}
-		if(typeof seriesInformation[currentCountry][rawName] == 'undefined'){
+		else if(typeof seriesInformation[currentCountry][rawName] == 'undefined'){
 			var name = rawName;
 		}else{
 			var name = seriesInformation[currentCountry][rawName].description;
-		}
+		}*/
+		var name = getFullSeriesName(rawName);
 		var date = new Date(rawDataTable.getValue(i, 1));
 		date = date.getMonth() + "/" + date.getDate() + "/" + date.getFullYear();
 		var sample = rawDataTable.getValue(i, 2);
