@@ -7,8 +7,8 @@
 	<link href='https://fonts.googleapis.com/css?family=Montserrat' rel='stylesheet' type='text/css'>
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.2/jquery.min.js"></script>
 	<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-	<script type="text/javaScript" src="home.js"></script>
-	<script type="text/javascript" src="WCalc.js"></script>
+	<script type="text/javaScript" src="home_revision1.js"></script>
+	<script type="text/javascript" src="WCalc_revision1.js"></script>
 	
 	<style>
 		body {
@@ -27,6 +27,7 @@
 		}
 		#banner {
 			text-align: center;
+			font-weight: normal;
 			
 		}
 		#leftCell {
@@ -77,7 +78,7 @@
 		#btnLoadTable {
 			display: none;
 		}
-		#btnDownloadChart, #btnDownloadTable {
+		#btnDownloadChart, #btnDownloadTable, #btnDownloadLog, #btnDownloadAverages {
 			display: block;
 			margin-right: 0;
 			margin-left: auto;
@@ -161,10 +162,13 @@
 			padding: 10px;
 			display: none;
 		}
-		#result table {
+		#result #logResults, #result #moodAverages {
+			max-height: 500px;
+			overflow-y: scroll;
 			border: 1px solid lightgrey;
+			margin-bottom: 4px;
 		}
-		#result table * {
+		#result table * , #result table{
 			border: none;
 		}
 		#moodAverages {
@@ -182,6 +186,9 @@
 			top: 20px;
 			left: 20px;
 			display: block;
+		}
+		#widthInput {
+			margin-top: 4px;
 		}
 		@media (max-width: 1100px) {
 			#logo {
@@ -215,7 +222,7 @@
 	</div>
 	<div id="middleLayer" onclick="hideInfo()"></div>
 	<div id="mainDiv">
-		<h2 id="banner">Executive Approval Database Visualization</h2>
+		<h1 id="banner">Executive Approval Database Visualization</h1>
 		<div id="divFilter">
 			<table>
 				<tr>
