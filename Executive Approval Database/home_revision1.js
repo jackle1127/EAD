@@ -36,7 +36,7 @@ function loadChartData() {
 		slider.draw();
 	}
 	function getDateString(date) {
-		return date.getMonth() + '/' + date.getDay() + '/' + date.getFullYear();
+		return (date.getMonth() + 1) + '/' + date.getDate() + '/' + date.getFullYear();
 	}
 	if (document.getElementById("rdioMultiSource").checked) { // If multiple source method is selected
 		var googleData = new google.visualization.DataTable();
